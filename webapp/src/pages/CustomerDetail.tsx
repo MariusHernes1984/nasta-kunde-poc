@@ -1,10 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import CustomerCard, { type CustomerInfo } from "../components/CustomerCard";
 import MachineList, { type Machine } from "../components/MachineList";
 import OrderList, { type Order } from "../components/OrderList";
-import AiChat, { type AiChatHandle } from "../components/AiChat";
-import { resetThread } from "../api/agent";
 import {
   fetchCustomer,
   fetchCustomerByOrgNr,
@@ -28,11 +26,8 @@ export default function CustomerDetail() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
-  const chatRef = useRef<AiChatHandle>(null);
-
   useEffect(() => {
     if (!query) return;
-    resetThread();
     loadData();
   }, [query, queryType]);
 
@@ -94,13 +89,15 @@ export default function CustomerDetail() {
           <CustomerCard
             customer={customer}
             onLookupProff={() =>
-              chatRef.current?.send(
-                `Slaa opp organisasjonsnummer ${customer.org_nummer} paa proff.no og vis firmainformasjon.`
+              window.open(
+                `https://www.proff.no/bransjes%C3%B8k?q=${customer.org_nummer}`,
+                "_blank"
               )
             }
             onLookupAt={() =>
-              chatRef.current?.send(
-                `Slaa opp organisasjonsnummer ${customer.org_nummer} paa at.no og vis tilsynsdata.`
+              window.open(
+                `https://www.arbeidstilsynet.no/opendata/virksomheter/?orgNr=${customer.org_nummer}`,
+                "_blank"
               )
             }
           />
@@ -128,8 +125,6 @@ export default function CustomerDetail() {
           />
         </>
       )}
-
-      <AiChat ref={chatRef} />
     </div>
   );
 }
