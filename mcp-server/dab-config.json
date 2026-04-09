@@ -1,0 +1,100 @@
+{
+  "$schema": "https://github.com/Azure/data-api-builder/releases/latest/download/dab.draft.schema.json",
+  "data-source": {
+    "database-type": "mssql",
+    "connection-string": "@env('MSSQL_CONNECTION_STRING')"
+  },
+  "runtime": {
+    "rest": {
+      "enabled": true,
+      "path": "/api"
+    },
+    "graphql": {
+      "enabled": false
+    },
+    "host": {
+      "mode": "production",
+      "cors": {
+        "origins": ["*"],
+        "allow-credentials": false
+      },
+      "authentication": {
+        "provider": "StaticWebApps"
+      }
+    }
+  },
+  "entities": {
+    "Customers": {
+      "source": "dbo.Customers",
+      "description": "Nasta AS kunderegister. Inneholder kundenummer (primaernokkel), firmanavn, adresse, epost, telefonnummer og organisasjonsnummer. Bruk kundenummer eller org_nummer for oppslag.",
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "read"
+            }
+          ]
+        }
+      ],
+      "mappings": {
+        "kundenummer": "kundenummer",
+        "navn": "navn",
+        "adresse": "adresse",
+        "epost": "epost",
+        "telefonnummer": "telefonnummer",
+        "org_nummer": "org_nummer"
+      }
+    },
+    "Machines": {
+      "source": "dbo.Machines",
+      "description": "Maskinpark tilknyttet kunder. Inneholder device_id (unik maskin-ID), maskinnavn (f.eks. Volvo EC220E Gravemaskin), aarsmodell og chassisnummer. Koblet til Customers via kundenummer.",
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "read"
+            }
+          ]
+        }
+      ],
+      "relationships": {
+        "customer": {
+          "cardinality": "one",
+          "target.entity": "Customers",
+          "source.fields": ["kundenummer"],
+          "target.fields": ["kundenummer"]
+        }
+      }
+    },
+    "Orders": {
+      "source": "dbo.Orders",
+      "description": "Serviceordrer og reparasjoner for Nasta AS. Inneholder ordrenummer, ordretype (Service/Reparasjon/Garanti/Deler), beskrivelse, status (Mottatt/Under behandling/Ferdig/Avsluttet), opprettet_dato og symptomer_feil. Koblet til Customers via kundenummer og Machines via device_id.",
+      "permissions": [
+        {
+          "role": "anonymous",
+          "actions": [
+            {
+              "action": "read"
+            }
+          ]
+        }
+      ],
+      "relationships": {
+        "customer": {
+          "cardinality": "one",
+          "target.entity": "Customers",
+          "source.fields": ["kundenummer"],
+          "target.fields": ["kundenummer"]
+        },
+        "machine": {
+          "cardinality": "one",
+          "target.entity": "Machines",
+          "source.fields": ["device_id"],
+          "target.fields": ["device_id"]
+        }
+      }
+    }
+  }
+}

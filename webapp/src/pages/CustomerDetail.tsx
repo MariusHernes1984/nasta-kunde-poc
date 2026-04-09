@@ -1,0 +1,114 @@
+import { useEffect, useState, useRef } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import CustomerCard, { type CustomerInfo } from "../components/CustomerCard";
+import MachineList, { type Machine } from "../components/MachineList";
+import OrderList, { type Order } from "../components/OrderList";
+import AiChat, { type AiChatHandle } from "../components/AiChat";
+import { resetThread } from "../api/agent";
+import {
+  fetchCustomer,
+  fetchCustomerByOrgNr,
+  fetchCustomersByName,
+  fetchMachines,
+  fetchOrders,
+} from "../api/dabClient";
+
+export default function CustomerDetail() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const query = searchParams.get("q") || "";
+  const queryType =
+    (searchParams.get("type") as "kundenummer" | "navn" | "org_nummer") ||
+    "kundenummer";
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [customer, setCustomer] = useState<CustomerInfo | null>(null);
+  const [machines, setMachines] = useState<Machine[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  const chatRef = useRef<AiChatHandle>(null);
+
+  useEffect(() => {
+    if (!query) return;
+    resetThread();
+    loadData();
+  }, [query, queryType]);
+
+  async function loadData() {
+    setLoading(true);
+    setError("");
+    try {
+      let cust: CustomerInfo | null = null;
+
+      if (queryType === "kundenummer") {
+        cust = await fetchCustomer(Number(query));
+      } else if (queryType === "org_nummer") {
+        cust = await fetchCustomerByOrgNr(query);
+      } else if (queryType === "navn") {
+        const results = await fetchCustomersByName(query);
+        cust = results.length > 0 ? results[0] : null;
+      }
+
+      if (!cust) {
+        setError("Ingen kunde funnet.");
+        setLoading(false);
+        return;
+      }
+
+      setCustomer(cust);
+
+      const [machineData, orderData] = await Promise.all([
+        fetchMachines(cust.kundenummer),
+        fetchOrders(cust.kundenummer),
+      ]);
+
+      setMachines(machineData);
+      setOrders(orderData);
+    } catch {
+      setError("Kunne ikke hente data. Sjekk at backend kjorer.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="detail-page">
+        <div className="loading">Henter kundeinformasjon...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="detail-page">
+      <button onClick={() => navigate("/")} className="btn btn-back">
+        Tilbake til soek
+      </button>
+
+      {error && <div className="error-banner">{error}</div>}
+
+      {customer && (
+        <>
+          <CustomerCard
+            customer={customer}
+            onLookupProff={() =>
+              chatRef.current?.send(
+                `Slaa opp organisasjonsnummer ${customer.org_nummer} paa proff.no og vis firmainformasjon.`
+              )
+            }
+            onLookupAt={() =>
+              chatRef.current?.send(
+                `Slaa opp organisasjonsnummer ${customer.org_nummer} paa at.no og vis tilsynsdata.`
+              )
+            }
+          />
+          <MachineList machines={machines} />
+          <OrderList orders={orders} />
+        </>
+      )}
+
+      <AiChat ref={chatRef} />
+    </div>
+  );
+}

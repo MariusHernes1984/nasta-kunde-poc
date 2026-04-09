@@ -1,0 +1,164 @@
+/* Nasta AS Kundeservice PoC - Styles */
+
+:root {
+  --primary: #1a56db;
+  --primary-hover: #1e40af;
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --muted-bg: #f1f5f9;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+.app-header {
+  background: var(--primary);
+  color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.logo-sub {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.card h2 { margin-bottom: 1rem; }
+.card h3 { margin-bottom: 1rem; font-size: 1.1rem; }
+
+.customer-card table { width: 100%; border-collapse: collapse; }
+.customer-card td { padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); }
+.customer-card .label { font-weight: 600; width: 150px; color: var(--text-muted); }
+
+.lookup-buttons { margin-top: 1rem; display: flex; gap: 0.75rem; }
+
+.table-container { overflow-x: auto; }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.data-table th {
+  text-align: left; padding: 0.75rem; background: var(--muted-bg);
+  border-bottom: 2px solid var(--border); font-weight: 600; color: var(--text-muted); white-space: nowrap;
+}
+.data-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+.data-table tr:hover { background: var(--muted-bg); }
+
+.mono { font-family: "Cascadia Code", "Fira Code", monospace; font-size: 0.85rem; }
+
+.badge {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px;
+  font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+}
+.badge-mottatt { background: #dbeafe; color: #1d4ed8; }
+.badge-behandling { background: #fef3c7; color: #92400e; }
+.badge-ferdig { background: #dcfce7; color: #166534; }
+.badge-avsluttet { background: #f1f5f9; color: #475569; }
+
+.btn {
+  padding: 0.6rem 1.2rem; border: none; border-radius: 6px;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+.btn-secondary { background: var(--muted-bg); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border); }
+.btn-back { background: transparent; color: var(--primary); border: 1px solid var(--primary); margin-bottom: 1.5rem; }
+.btn-back:hover { background: #eff6ff; }
+
+.search-page { display: flex; justify-content: center; padding-top: 4rem; }
+.search-container { width: 100%; max-width: 600px; text-align: center; }
+.search-container h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+.subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+
+.search-form {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+.search-type-row { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
+.search-type-row label {
+  padding: 0.5rem 1rem; border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.15s;
+}
+.search-type-row label.active { background: var(--primary); color: white; border-color: var(--primary); }
+.search-type-row input[type="radio"] { display: none; }
+.search-input-row { display: flex; gap: 0.75rem; }
+.search-input {
+  flex: 1; padding: 0.75rem 1rem; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 1rem; outline: none;
+}
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1); }
+
+.chat-card { display: flex; flex-direction: column; }
+.chat-messages {
+  min-height: 200px; max-height: 400px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 1rem; margin-bottom: 1rem; background: var(--muted-bg);
+}
+.chat-message { margin-bottom: 1rem; }
+.chat-user { text-align: right; }
+.chat-bubble {
+  display: inline-block; max-width: 80%; padding: 0.75rem 1rem;
+  border-radius: 12px; text-align: left;
+}
+.chat-user .chat-bubble { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+.chat-assistant .chat-bubble { background: white; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.chat-role { display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.25rem; opacity: 0.7; }
+.chat-content { font-size: 0.9rem; white-space: pre-wrap; }
+.chat-input-row { display: flex; gap: 0.75rem; }
+.chat-input-row textarea {
+  flex: 1; padding: 0.75rem; border: 1px solid var(--border);
+  border-radius: 6px; font-family: inherit; font-size: 0.9rem; resize: none; outline: none;
+}
+.chat-input-row textarea:focus { border-color: var(--primary); }
+
+.loading { text-align: center; padding: 4rem; color: var(--text-muted); font-size: 1.1rem; }
+.loading-dots { opacity: 0.6; }
+.empty-state { color: var(--text-muted); font-style: italic; }
+.error-banner {
+  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+  padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1.5rem;
+}
+.agent-response {
+  background: var(--muted-bg); padding: 1rem; border-radius: 6px;
+  font-size: 0.85rem; white-space: pre-wrap; overflow-x: auto; font-family: inherit;
+}
+.detail-page { padding-top: 1rem; }
