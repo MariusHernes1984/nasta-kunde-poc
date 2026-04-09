@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import CustomerCard, { type CustomerInfo } from "../components/CustomerCard";
 import MachineList, { type Machine } from "../components/MachineList";
 import OrderList, { type Order } from "../components/OrderList";
+import CustomerSummary from "../components/CustomerSummary";
 import {
   fetchCustomer,
   fetchCustomerByOrgNr,
@@ -86,6 +87,7 @@ export default function CustomerDetail() {
 
       {customer && (
         <>
+          <CustomerSummary kundenummer={customer.kundenummer} />
           <CustomerCard
             customer={customer}
             onLookupProff={() =>

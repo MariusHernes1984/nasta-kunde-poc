@@ -19,7 +19,7 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 AOAI_ENDPOINT = os.environ.get("AOAI_ENDPOINT", "https://aoai-nasta-poc.openai.azure.com")
 AOAI_KEY = os.environ.get("AOAI_KEY", "")
 AOAI_DEPLOYMENT = os.environ.get("AOAI_DEPLOYMENT", "gpt-5-3-chat")
-AOAI_API_VERSION = "2024-12-01-preview"
+AOAI_API_VERSION = "2025-04-01-preview"
 MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "https://ca-nasta-mcp.salmonsmoke-ae79c912.norwayeast.azurecontainerapps.io")
 
 MAX_RETRIES = 3
@@ -342,6 +342,124 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         headers={"Access-Control-Allow-Origin": "*"},
     )
+
+
+SUMMARY_SYSTEM_PROMPT = """Du er en salgsanalytiker for Nasta AS, en leverandoer av anleggsmaskiner i Norge.
+
+Du mottar kundedata, maskinpark og ordrehistorikk i JSON-format.
+Analyser dataene og returner ALLTID et gyldig JSON-objekt med NOYAKTIG denne strukturen:
+
+{
+  "summary": "2-4 setninger som oppsummerer kunden: aktivitetsnivaa, maskinpark-tilstand, ordretrender og viktige observasjoner.",
+  "upsells": [
+    {
+      "title": "Kort tittel (maks 8 ord)",
+      "description": "1-2 setninger med konkret begrunnelse basert paa dataene.",
+      "priority": "high|medium|low"
+    }
+  ]
+}
+
+Regler for analyse:
+- Maskiner med aarsmodell eldre enn 2018 er kandidater for oppgradering
+- Mange reparasjonsordrer paa samme maskin = foreslaa servicekontrakt
+- Kunder med kun gravemaskiner men ingen hjullastere = kryssalg-mulighet
+- Ingen ordrer siste 6 mnd (basert paa opprettet_dato) = churn-risiko
+- Hoeyt antall ordrer med status "Mottatt" eller "Under behandling" = aktiv kunde
+- Ordretype "Garanti" = maskinproblemer, vurder oppfoelging
+- Gi 2-4 upsell-anbefalinger, sortert etter prioritet (high foerst)
+- Skriv ALT paa norsk
+- Returner KUN JSON, ingen annen tekst"""
+
+
+@app.route(route="customer-summary", methods=["POST", "OPTIONS"])
+async def customer_summary(req: func.HttpRequest) -> func.HttpResponse:
+    """AI-powered customer summary + upsell recommendations."""
+    if req.method == "OPTIONS":
+        return func.HttpResponse(
+            "", status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type",
+            },
+        )
+
+    try:
+        body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid JSON"}), status_code=400, mimetype="application/json",
+        )
+
+    kundenummer = body.get("kundenummer")
+    if not kundenummer:
+        return func.HttpResponse(
+            json.dumps({"error": "kundenummer is required"}), status_code=400, mimetype="application/json",
+        )
+
+    try:
+        # Fetch all data from DAB in parallel
+        customer_data, machines_data, orders_data = await asyncio.gather(
+            query_dab("Customers", "kundenummer", kundenummer),
+            query_dab("Machines", "kundenummer", kundenummer),
+            query_dab("Orders", "kundenummer", kundenummer),
+        )
+
+        user_prompt = f"""Analyser denne kunden og gi oppsummering + salgsanbefalinger.
+
+KUNDEDATA:
+{customer_data}
+
+MASKINPARK:
+{machines_data}
+
+ORDREHISTORIKK:
+{orders_data}"""
+
+        url = f"{AOAI_ENDPOINT}/openai/deployments/{AOAI_DEPLOYMENT}/chat/completions?api-version={AOAI_API_VERSION}"
+        headers = {"Content-Type": "application/json", "api-key": AOAI_KEY}
+        api_body = {
+            "messages": [
+                {"role": "system", "content": SUMMARY_SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ],
+            "max_completion_tokens": 1500,
+        }
+
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(url, json=api_body, headers=headers)
+            resp.raise_for_status()
+            data = resp.json()
+
+        content = data["choices"][0]["message"]["content"]
+
+        # Strip markdown code fences if present
+        content = content.strip()
+        if content.startswith("```"):
+            content = re.sub(r"^```(?:json)?\s*", "", content)
+            content = re.sub(r"\s*```$", "", content)
+
+        result = json.loads(content)
+
+        return func.HttpResponse(
+            json.dumps(result, ensure_ascii=False),
+            mimetype="application/json",
+            headers={"Access-Control-Allow-Origin": "*"},
+        )
+    except json.JSONDecodeError:
+        logging.error(f"GPT returned invalid JSON: {content}")
+        return func.HttpResponse(
+            json.dumps({"summary": content, "upsells": []}),
+            mimetype="application/json",
+            headers={"Access-Control-Allow-Origin": "*"},
+        )
+    except Exception as e:
+        logging.error(f"Summary error: {e}")
+        return func.HttpResponse(
+            json.dumps({"error": str(e)}), status_code=500, mimetype="application/json",
+            headers={"Access-Control-Allow-Origin": "*"},
+        )
 
 
 @app.route(route="health", methods=["GET"])
