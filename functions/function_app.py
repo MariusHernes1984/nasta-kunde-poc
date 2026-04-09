@@ -174,9 +174,21 @@ def extract_text(html: str) -> str:
     return text[:3000]
 
 
+async def fetch_all_pages(client: httpx.AsyncClient, url: str) -> list[dict]:
+    """Fetch all pages from DAB, following nextLink pagination."""
+    all_items: list[dict] = []
+    next_url: str | None = url
+    while next_url:
+        resp = await client.get(next_url)
+        data = resp.json()
+        all_items.extend(data.get("value", []))
+        next_url = data.get("nextLink")
+    return all_items
+
+
 async def query_dab(entity: str, filter_field: str | None = None, filter_value: str | int | None = None) -> str:
     """Query Data API Builder. For PK lookups uses /entity/pk/val, otherwise fetches all and filters."""
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         # Primary key lookups work via URL path
         pk_fields = {"Customers": "kundenummer", "Machines": "device_id", "Orders": "ordrenummer"}
         pk = pk_fields.get(entity)
@@ -186,15 +198,15 @@ async def query_dab(entity: str, filter_field: str | None = None, filter_value: 
             resp = await client.get(url)
             return resp.text
 
-        # For non-PK filters, fetch all and filter in memory (fine for PoC with <500 rows)
+        # Fetch all pages and optionally filter in memory
         url = f"{MCP_SERVER_URL}/api/{entity}"
-        resp = await client.get(url)
-        if not filter_field or filter_value is None:
-            return resp.text
+        all_items = await fetch_all_pages(client, url)
 
-        data = resp.json()
+        if not filter_field or filter_value is None:
+            return json.dumps({"value": all_items})
+
         filtered = [
-            r for r in data.get("value", [])
+            r for r in all_items
             if str(r.get(filter_field, "")) == str(filter_value)
         ]
         return json.dumps({"value": filtered})
