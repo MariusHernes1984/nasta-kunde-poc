@@ -10,6 +10,7 @@ interface Order {
 
 interface Props {
   orders: Order[];
+  filterLabel?: string;
 }
 
 function statusBadgeClass(status: string): string {
@@ -27,19 +28,29 @@ function statusBadgeClass(status: string): string {
   }
 }
 
-export default function OrderList({ orders }: Props) {
+export default function OrderList({ orders, filterLabel }: Props) {
   if (orders.length === 0) {
     return (
       <div className="card">
-        <h3>Ordrer</h3>
-        <p className="empty-state">Ingen ordrer registrert</p>
+        <h3>
+          Ordrer
+          {filterLabel && <span className="filter-badge">{filterLabel}</span>}
+        </h3>
+        <p className="empty-state">
+          {filterLabel
+            ? `Ingen ordrer for ${filterLabel}`
+            : "Ingen ordrer registrert"}
+        </p>
       </div>
     );
   }
 
   return (
     <div className="card">
-      <h3>Ordrer ({orders.length} stk)</h3>
+      <h3>
+        Ordrer ({orders.length} stk)
+        {filterLabel && <span className="filter-badge">{filterLabel}</span>}
+      </h3>
       <div className="table-container">
         <table className="data-table">
           <thead>

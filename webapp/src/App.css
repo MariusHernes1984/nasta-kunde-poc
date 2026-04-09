@@ -166,3 +166,24 @@ main {
   font-size: 0.85rem; white-space: pre-wrap; overflow-x: auto; font-family: inherit;
 }
 .detail-page { padding-top: 1rem; }
+
+/* Machine row selection */
+.machine-table tbody tr { cursor: pointer; transition: background 0.15s, border-left 0.15s; }
+.machine-row:hover { background: #fef2f2 !important; }
+.machine-selected {
+  background: #fde8e8 !important;
+  border-left: 3px solid var(--red);
+  font-weight: 600;
+}
+.machine-selected td:first-child { padding-left: calc(0.75rem - 3px); }
+
+/* Filter indicators */
+.filter-hint {
+  font-size: 0.8rem; font-weight: 400; color: var(--text-muted);
+}
+.filter-badge {
+  display: inline-block; margin-left: 0.75rem;
+  padding: 0.15rem 0.6rem; border-radius: 12px;
+  font-size: 0.75rem; font-weight: 600;
+  background: var(--red); color: white;
+}

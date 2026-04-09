@@ -7,9 +7,15 @@ interface Machine {
 
 interface Props {
   machines: Machine[];
+  selectedDeviceId?: string | null;
+  onSelectMachine?: (deviceId: string) => void;
 }
 
-export default function MachineList({ machines }: Props) {
+export default function MachineList({
+  machines,
+  selectedDeviceId,
+  onSelectMachine,
+}: Props) {
   if (machines.length === 0) {
     return (
       <div className="card">
@@ -21,9 +27,14 @@ export default function MachineList({ machines }: Props) {
 
   return (
     <div className="card">
-      <h3>Maskiner ({machines.length} stk)</h3>
+      <h3>
+        Maskiner ({machines.length} stk)
+        {selectedDeviceId && (
+          <span className="filter-hint"> — klikk maskinen igjen for aa vise alle ordrer</span>
+        )}
+      </h3>
       <div className="table-container">
-        <table className="data-table">
+        <table className="data-table machine-table">
           <thead>
             <tr>
               <th>Device ID</th>
@@ -34,7 +45,11 @@ export default function MachineList({ machines }: Props) {
           </thead>
           <tbody>
             {machines.map((m) => (
-              <tr key={m.device_id}>
+              <tr
+                key={m.device_id}
+                className={`machine-row ${selectedDeviceId === m.device_id ? "machine-selected" : ""}`}
+                onClick={() => onSelectMachine?.(m.device_id)}
+              >
                 <td className="mono">{m.device_id}</td>
                 <td>{m.maskin_navn}</td>
                 <td>{m.aarsmodell}</td>

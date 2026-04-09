@@ -26,6 +26,7 @@ export default function CustomerDetail() {
   const [customer, setCustomer] = useState<CustomerInfo | null>(null);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
 
   const chatRef = useRef<AiChatHandle>(null);
 
@@ -103,8 +104,28 @@ export default function CustomerDetail() {
               )
             }
           />
-          <MachineList machines={machines} />
-          <OrderList orders={orders} />
+          <MachineList
+            machines={machines}
+            selectedDeviceId={selectedDeviceId}
+            onSelectMachine={(deviceId) =>
+              setSelectedDeviceId((prev) =>
+                prev === deviceId ? null : deviceId
+              )
+            }
+          />
+          <OrderList
+            orders={
+              selectedDeviceId
+                ? orders.filter((o) => o.device_id === selectedDeviceId)
+                : orders
+            }
+            filterLabel={
+              selectedDeviceId
+                ? machines.find((m) => m.device_id === selectedDeviceId)
+                    ?.maskin_navn || selectedDeviceId
+                : undefined
+            }
+          />
         </>
       )}
 
