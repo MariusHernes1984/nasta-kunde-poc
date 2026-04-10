@@ -80,7 +80,7 @@ export default function CustomerDetail() {
   return (
     <div className="detail-page">
       <button onClick={() => navigate("/")} className="btn btn-back">
-        Tilbake til soek
+        Tilbake til søk
       </button>
 
       {error && <div className="error-banner">{error}</div>}

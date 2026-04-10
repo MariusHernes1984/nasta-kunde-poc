@@ -72,7 +72,7 @@ export default forwardRef<AiChatHandle, Props>(function AiChat({ initialContext 
       <div className="chat-messages">
         {messages.length === 0 && (
           <p className="empty-state">
-            Still spoersmaal om kunden, maskinene eller ordrene...
+            Still spørsmål om kunden, maskinene eller ordrene...
           </p>
         )}
         {messages.map((msg, i) => (
@@ -100,7 +100,7 @@ export default forwardRef<AiChatHandle, Props>(function AiChat({ initialContext 
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Skriv et spoersmaal..."
+          placeholder="Skriv et spørsmål..."
           rows={2}
           disabled={loading}
         />

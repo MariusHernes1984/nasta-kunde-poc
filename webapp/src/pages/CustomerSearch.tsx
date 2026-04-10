@@ -21,7 +21,7 @@ export default function CustomerSearch() {
       <div className="search-container">
         <h1>Nasta AS - Kundeoppslag</h1>
         <p className="subtitle">
-          Soek etter kunder med kundenummer, navn eller organisasjonsnummer
+          Søk etter kunder med kundenummer, navn eller organisasjonsnummer
         </p>
         <form onSubmit={handleSearch} className="search-form">
           <div className="search-type-row">
@@ -71,7 +71,7 @@ export default function CustomerSearch() {
               className="search-input"
             />
             <button type="submit" className="btn btn-primary">
-              Soek
+              Søk
             </button>
           </div>
         </form>

@@ -30,7 +30,7 @@ export default function MachineList({
       <h3>
         Maskiner ({machines.length} stk)
         {selectedDeviceId && (
-          <span className="filter-hint"> — klikk maskinen igjen for aa vise alle ordrer</span>
+          <span className="filter-hint"> — klikk maskinen igjen for å vise alle ordrer</span>
         )}
       </h3>
       <div className="table-container">
@@ -39,7 +39,7 @@ export default function MachineList({
             <tr>
               <th>Device ID</th>
               <th>Maskin</th>
-              <th>Aarsmodell</th>
+              <th>Årsmodell</th>
               <th>Chassisnummer</th>
             </tr>
           </thead>

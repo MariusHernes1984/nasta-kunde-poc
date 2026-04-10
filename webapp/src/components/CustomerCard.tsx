@@ -49,10 +49,10 @@ export default function CustomerCard({
       </table>
       <div className="lookup-buttons">
         <button onClick={onLookupProff} className="btn btn-secondary">
-          Slaa opp paa Proff.no
+          Slå opp på Proff.no
         </button>
         <button onClick={onLookupAt} className="btn btn-secondary">
-          Slaa opp paa At.no
+          Slå opp på At.no
         </button>
       </div>
     </div>
