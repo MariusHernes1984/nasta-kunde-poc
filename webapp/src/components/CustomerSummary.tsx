@@ -32,6 +32,7 @@ export default function CustomerSummary({ kundenummer }: Props) {
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,6 +62,8 @@ export default function CustomerSummary({ kundenummer }: Props) {
     };
   }, [kundenummer]);
 
+  const highCount = data?.upsells.filter((u) => u.priority === "high").length ?? 0;
+
   if (loading) {
     return (
       <div className="card summary-card">
@@ -79,43 +82,54 @@ export default function CustomerSummary({ kundenummer }: Props) {
   if (error || !data) {
     return (
       <div className="card summary-card">
-        <div className="summary-header">
+        <div className="summary-header clickable" onClick={() => setCollapsed(!collapsed)}>
           <h3>AI Kundeanalyse</h3>
           <span className="ai-badge">GPT 5.3</span>
+          <span className="collapse-toggle">{collapsed ? "+" : "\u2212"}</span>
         </div>
-        <p className="empty-state">{error || "Ingen analyse tilgjengelig"}</p>
+        {!collapsed && (
+          <p className="empty-state">{error || "Ingen analyse tilgjengelig"}</p>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="card summary-card">
-      <div className="summary-header">
+    <div className={`card summary-card ${collapsed ? "summary-collapsed" : ""}`}>
+      <div className="summary-header clickable" onClick={() => setCollapsed(!collapsed)}>
         <h3>AI Kundeanalyse</h3>
         <span className="ai-badge">GPT 5.3</span>
+        {collapsed && highCount > 0 && (
+          <span className="summary-mini-badge">{highCount} viktig{highCount > 1 ? "e" : ""}</span>
+        )}
+        <span className="collapse-toggle">{collapsed ? "+" : "\u2212"}</span>
       </div>
 
-      <div className="summary-text">{data.summary}</div>
+      {!collapsed && (
+        <>
+          <div className="summary-text">{data.summary}</div>
 
-      {data.upsells.length > 0 && (
-        <div className="upsell-section">
-          <h4>Salgsanbefalinger</h4>
-          <div className="upsell-list">
-            {data.upsells.map((u, i) => (
-              <div key={i} className={`upsell-item upsell-${u.priority}`}>
-                <div className="upsell-priority">
-                  <span className={`priority-dot priority-${u.priority}`}>
-                    {priorityIcon(u.priority)}
-                  </span>
-                </div>
-                <div className="upsell-content">
-                  <strong>{u.title}</strong>
-                  <p>{u.description}</p>
-                </div>
+          {data.upsells.length > 0 && (
+            <div className="upsell-section">
+              <h4>Salgsanbefalinger</h4>
+              <div className="upsell-list">
+                {data.upsells.map((u, i) => (
+                  <div key={i} className={`upsell-item upsell-${u.priority}`}>
+                    <div className="upsell-priority">
+                      <span className={`priority-dot priority-${u.priority}`}>
+                        {priorityIcon(u.priority)}
+                      </span>
+                    </div>
+                    <div className="upsell-content">
+                      <strong>{u.title}</strong>
+                      <p>{u.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
