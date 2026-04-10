@@ -140,8 +140,8 @@ TOOLS = [
 # In-memory thread storage (for PoC)
 threads: dict[str, list[dict]] = {}
 
-# Mutable prompt storage (in-memory, resets on cold start)
-current_summary_prompt: str = SUMMARY_SYSTEM_PROMPT
+# Mutable prompt storage — initialized after SUMMARY_SYSTEM_PROMPT is defined
+current_summary_prompt: str = ""
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -385,6 +385,8 @@ Regler for analyse:
 - Gi 2-4 upsell-anbefalinger, sortert etter prioritet (high foerst)
 - Skriv ALT paa norsk
 - Returner KUN JSON, ingen annen tekst"""
+
+current_summary_prompt = SUMMARY_SYSTEM_PROMPT
 
 
 @app.route(route="customer-summary", methods=["POST", "OPTIONS"])
