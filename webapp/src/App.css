@@ -51,6 +51,16 @@ body {
   opacity: 0.8;
 }
 
+.header-nav {
+  margin-left: auto; display: flex; gap: 0.5rem;
+}
+.header-nav a {
+  color: white; text-decoration: none; font-size: 0.85rem;
+  padding: 0.35rem 0.75rem; border-radius: 4px; opacity: 0.8;
+  transition: opacity 0.15s, background 0.15s;
+}
+.header-nav a:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+
 main {
   max-width: 1200px;
   margin: 0 auto;
@@ -166,6 +176,37 @@ main {
   font-size: 0.85rem; white-space: pre-wrap; overflow-x: auto; font-family: inherit;
 }
 .detail-page { padding-top: 1rem; }
+.success-banner {
+  background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
+  padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem;
+}
+
+/* Prompt Editor */
+.prompt-editor-card { }
+.prompt-editor-header {
+  display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;
+}
+.prompt-editor-header h2 { margin-bottom: 0; }
+.prompt-description { color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem; }
+.prompt-textarea {
+  width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 6px;
+  font-family: "Cascadia Code", "Fira Code", monospace; font-size: 0.85rem;
+  line-height: 1.6; resize: vertical; outline: none; background: #fafafa;
+}
+.prompt-textarea:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(207,3,36,0.1); }
+.prompt-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 1rem; flex-wrap: wrap; gap: 0.75rem;
+}
+.prompt-meta { font-size: 0.8rem; color: var(--text-muted); }
+.prompt-modified { color: var(--accent); font-weight: 600; }
+.prompt-actions { display: flex; gap: 0.5rem; }
+.prompt-tips { padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); }
+.prompt-tips li { margin-bottom: 0.4rem; }
+.prompt-tips code {
+  background: var(--muted-bg); padding: 0.1rem 0.4rem; border-radius: 3px;
+  font-size: 0.8rem;
+}
 
 /* Machine row selection */
 .machine-table tbody tr { cursor: pointer; transition: background 0.15s, border-left 0.15s; }

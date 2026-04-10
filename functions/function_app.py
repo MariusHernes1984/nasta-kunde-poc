@@ -140,6 +140,9 @@ TOOLS = [
 # In-memory thread storage (for PoC)
 threads: dict[str, list[dict]] = {}
 
+# Mutable prompt storage (in-memory, resets on cold start)
+current_summary_prompt: str = SUMMARY_SYSTEM_PROMPT
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
@@ -433,7 +436,7 @@ ORDREHISTORIKK:
         headers = {"Content-Type": "application/json", "api-key": AOAI_KEY}
         api_body = {
             "messages": [
-                {"role": "system", "content": SUMMARY_SYSTEM_PROMPT},
+                {"role": "system", "content": current_summary_prompt},
                 {"role": "user", "content": user_prompt},
             ],
             "max_completion_tokens": 1500,
@@ -472,6 +475,55 @@ ORDREHISTORIKK:
             json.dumps({"error": str(e)}), status_code=500, mimetype="application/json",
             headers={"Access-Control-Allow-Origin": "*"},
         )
+
+
+@app.route(route="prompt", methods=["GET", "PUT", "OPTIONS"])
+async def prompt(req: func.HttpRequest) -> func.HttpResponse:
+    """GET/PUT the AI summary system prompt."""
+    global current_summary_prompt
+
+    if req.method == "OPTIONS":
+        return func.HttpResponse(
+            "", status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type",
+            },
+        )
+
+    if req.method == "GET":
+        return func.HttpResponse(
+            json.dumps({
+                "prompt": current_summary_prompt,
+                "default": SUMMARY_SYSTEM_PROMPT,
+            }, ensure_ascii=False),
+            mimetype="application/json",
+            headers={"Access-Control-Allow-Origin": "*"},
+        )
+
+    # PUT
+    try:
+        body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid JSON"}), status_code=400, mimetype="application/json",
+        )
+
+    new_prompt = body.get("prompt", "").strip()
+    if not new_prompt:
+        return func.HttpResponse(
+            json.dumps({"error": "prompt is required"}), status_code=400, mimetype="application/json",
+        )
+
+    current_summary_prompt = new_prompt
+    logging.info(f"Prompt updated ({len(new_prompt)} chars)")
+
+    return func.HttpResponse(
+        json.dumps({"status": "ok", "length": len(new_prompt)}, ensure_ascii=False),
+        mimetype="application/json",
+        headers={"Access-Control-Allow-Origin": "*"},
+    )
 
 
 @app.route(route="health", methods=["GET"])
